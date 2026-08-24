@@ -47,6 +47,8 @@ body { min-height:100vh; color:var(--ink); background:radial-gradient(circle at 
 .progress-track { height:12px; background:var(--line); }
 .progress-track span { background:linear-gradient(90deg,var(--blue),#3c8fe4); box-shadow:0 0 14px rgba(0,102,204,.28); }
 .progress-footer { color:var(--muted); }
+.overtime-status { display:flex; align-items:center; gap:10px; margin-top:20px; padding:12px 14px; color:var(--muted); background:var(--surface-soft); border:1px solid var(--line); border-radius:10px; transition:background .25s,border-color .25s,color .25s; }
+.overtime-status b,.overtime-status small { display:block; }.overtime-status b { color:var(--ink); font-size:11px; }.overtime-status small { margin-top:3px; font-size:10px; }.overtime-status > strong { margin-left:auto; color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:13px; white-space:nowrap; }.overtime-icon { display:grid; place-items:center; width:26px; height:26px; color:var(--blue); background:#eaf3fd; border-radius:7px; font-size:17px; font-weight:700; }.overtime-status.has-overtime { color:#9a6500; background:#fff9e9; border-color:rgba(245,158,11,.35); }.overtime-status.has-overtime b,.overtime-status.has-overtime > strong { color:#9a6500; }.overtime-status.has-overtime .overtime-icon { color:#b87500; background:#ffefc2; }.overtime-status.limit-reached { color:var(--red); background:#fff0f0; border-color:rgba(220,38,38,.35); }.overtime-status.limit-reached b,.overtime-status.limit-reached > strong { color:var(--red); }.overtime-status.limit-reached .overtime-icon { color:var(--white); background:var(--red); }
 .stats-grid { gap:16px; margin:18px 0; }
 .stat-card { min-height:112px; border-left-width:4px; transition:transform .25s,box-shadow .25s; }
 .stat-card:hover { transform:translateY(-3px); box-shadow:0 20px 40px rgba(11,31,58,.12); }
@@ -79,6 +81,8 @@ body[data-journey-state="complete"] .progress-card:before { background:var(--gre
 body[data-journey-state="overtime"] .progress-card:before { background:var(--red); }
 body[data-journey-state="complete"] .progress-track span { background:var(--green); }
 body[data-journey-state="overtime"] .progress-track span { background:var(--red); }
+body[data-journey-state="overtime-limit"] .progress-card:before { background:var(--red); }
+body[data-journey-state="overtime-limit"] .progress-track span { background:var(--red); }
 .manual-adjustment { margin-top:18px; padding-top:15px; border-top:1px solid var(--line); }
 .manual-adjustment summary { display:flex; align-items:center; gap:7px; width:max-content; color:var(--blue); cursor:pointer; font-size:11px; font-weight:700; list-style:none; }
 .manual-adjustment summary::-webkit-details-marker { display:none; }
@@ -113,6 +117,7 @@ body[data-tour-target="clock-in"] .tour-dialog:before { left:-9px; bottom:50%; b
 .hero-grid,.progress-card,.stats-grid,.content-grid { animation:rise-in .55s ease both; }
 .progress-card { animation-delay:.08s; }.stats-grid { animation-delay:.16s; }.content-grid { animation-delay:.24s; }
 @media (max-width:760px) { .topbar { height:78px; }.topbar-date { margin-left:auto; }.theme-toggle { margin-left:12px; }.hero-grid { padding-top:40px; }.progress-card,.panel { padding:24px 20px; }.stats-grid { gap:10px; } }
+@media (max-width:410px) { .overtime-status { align-items:flex-start; }.overtime-status > strong { margin-left:auto; font-size:11px; text-align:right; } }
 @media (max-width:410px) { .adjust-form { align-items:stretch; flex-direction:column; }.adjust-form button { width:100%; } }
 @media (max-width:410px) { .tour-dialog { bottom:16px; padding:23px 20px 18px; }.tour-dialog h2 { font-size:21px; } }
 @media (max-width:760px) { body[data-tour-target="clock-in"] .tour-dialog { left:50%; bottom:18px; transform:translateX(-50%); } body[data-tour-target="clock-in"] .tour-dialog:before { left:50%; bottom:-9px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); border-left:0; transform:translateX(-50%) rotate(45deg); } }

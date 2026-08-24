@@ -4,6 +4,7 @@
   let config = storage.getConfig();
   let session = storage.getSession();
   let toastTimer;
+  const MAX_OVERTIME_MINUTES = 120;
   let tourIndex = 0;
   const tourSteps = [
     { target: '.hero-grid', title: 'Seu painel, de primeira', description: 'Aqui você encontra sua saudação, a data e o relógio que acompanha cada segundo da jornada.' },
@@ -53,14 +54,20 @@
       worked = Math.max(0, worked);
     }
     const remaining = session.entry ? Math.max(0, config.workdayMinutes - worked) : config.workdayMinutes;
+    const overtime = session.entry ? Math.max(0, worked - config.workdayMinutes) : 0;
+    const overtimeRemaining = Math.max(0, MAX_OVERTIME_MINUTES - overtime);
     const progress = session.entry ? Math.min(100, (worked / config.workdayMinutes) * 100) : 0;
-    document.body.dataset.journeyState = session.exit ? (worked > config.workdayMinutes ? 'overtime' : 'complete') : session.lunchStart && !session.lunchEnd ? 'lunch' : progress >= 85 ? 'ending' : session.entry ? 'active' : 'idle';
+    document.body.dataset.journeyState = session.exit ? (overtime > MAX_OVERTIME_MINUTES ? 'overtime-limit' : overtime > 0 ? 'overtime' : 'complete') : session.lunchStart && !session.lunchEnd ? 'lunch' : overtime >= MAX_OVERTIME_MINUTES ? 'overtime-limit' : overtime > 0 ? 'overtime' : progress >= 85 ? 'ending' : session.entry ? 'active' : 'idle';
     el('worked-time').textContent = minutesToText(worked); el('stat-worked').textContent = minutesToText(worked);
     el('remaining-time').textContent = minutesToText(remaining); el('stat-remaining').textContent = minutesToText(remaining);
     el('entry-time').textContent = timeText(session.entry); el('expected-exit').textContent = timeText(end);
     el('progress-percent').textContent = `${Math.round(progress)}%`; el('progress-fill').style.width = `${progress}%`;
     el('progress-track')?.setAttribute('aria-valuenow', String(Math.round(progress)));
     el('progress-message').textContent = session.exit ? 'Jornada encerrada' : session.entry ? (session.lunchStart && !session.lunchEnd ? 'Almoço em andamento' : 'Jornada em andamento') : 'Registre sua entrada para começar';
+    el('overtime-time').textContent = `${minutesToText(overtime)} / ${minutesToText(MAX_OVERTIME_MINUTES)}`;
+    el('overtime-message').textContent = overtime >= MAX_OVERTIME_MINUTES ? 'Limite de 2h extras alcançado' : overtime > 0 ? `${minutesToText(overtimeRemaining)} disponíveis neste turno` : `Limite do turno: ${minutesToText(MAX_OVERTIME_MINUTES)}`;
+    el('overtime-status').classList.toggle('has-overtime', overtime > 0);
+    el('overtime-status').classList.toggle('limit-reached', overtime >= 120);
     const records = [['Entrada', session.entry], ['Início do almoço', session.lunchStart], ['Volta do almoço', session.lunchEnd], ['Saída', session.exit]].filter(record => record[1]);
     el('last-record').textContent = records.length ? `Último registro: ${records[records.length - 1][0]} às ${timeText(records[records.length - 1][1])}` : 'Nenhum registro realizado hoje.';
     setButtonState();
