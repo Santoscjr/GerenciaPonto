@@ -1,3 +1,5 @@
+// Gerencia login, cadastro, recuperacao de senha e encerramento de sessao.
+// Handles login, signup, password recovery, and session sign-out.
 (function () {
   'use strict';
   const config = window.SUPABASE_CONFIG;
@@ -26,7 +28,7 @@
     const signup = mode === 'signup';
     nameInput.closest('label').hidden = !signup;
     nameInput.required = signup;
-    authTitle.textContent = signup ? 'Crie seu acesso' : 'Bem-vindo de volta';
+    authTitle.textContent = signup ? 'Crie seu acesso' : 'Acesse sua jornada';
     authDescription.textContent = signup ? 'Seu controle de jornada, sempre com você.' : 'Entre para acessar seu controle de jornada.';
     authSubmit.textContent = signup ? 'Criar minha conta' : 'Entrar no sistema';
     authSwitch.textContent = signup ? 'Já tenho uma conta' : 'Ainda não tenho uma conta';
@@ -39,6 +41,7 @@
     document.body.classList.remove('auth-loading');
     const displayName = user.user_metadata?.name;
     if (displayName && !localStorage.getItem('gerenciaPonto.config')) localStorage.setItem('gerenciaPonto.config', JSON.stringify({ name: displayName, workdayMinutes: 528, lunchMinutes: 60, lunchPaid: false }));
+    if (displayName && document.getElementById('user-name')) document.getElementById('user-name').textContent = displayName;
     document.dispatchEvent(new CustomEvent('ponto:authenticated'));
   }
   async function loadSession() {

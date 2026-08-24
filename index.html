@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Controle pessoal de jornada e ponto.">
+    <meta name="theme-color" content="#0B1F3A">
+    <link rel="manifest" href="manifest.webmanifest">
   <title>Gerencia Ponto</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -12,7 +14,7 @@
     <div class="auth-card">
       <a class="brand auth-brand" href="index.html" aria-label="Gerencia Ponto - inicio"><span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span><span>gerencia<span class="brand-accent">ponto</span></span></a>
       <p class="eyebrow">Seu controle de jornada</p>
-      <h1 id="auth-title">Bem-vindo de volta</h1>
+      <h1 id="auth-title">Acesse sua jornada</h1>
       <p id="auth-description" class="auth-description">Entre para acessar seu controle de jornada.</p>
       <form id="auth-form">
         <label for="auth-name" hidden>Nome<input id="auth-name" type="text" autocomplete="name" placeholder="Seu nome"></label>
@@ -73,6 +75,7 @@
           <span id="progress-message">Registre sua entrada para começar</span>
           <span><strong id="remaining-time">08h 48m</strong> restantes</span>
         </div>
+        <p class="shift-info" id="shift-info">Registre sua entrada para ver o fim do turno.</p>
         <div class="overtime-status" id="overtime-status" role="status">
           <span class="overtime-icon">+</span>
           <span><b>Hora extra</b><small id="overtime-message">Limite do turno: 02h 00m</small></span>
@@ -156,6 +159,7 @@
   <script src="js/supabase-config.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/cloud.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

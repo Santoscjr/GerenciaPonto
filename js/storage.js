@@ -1,3 +1,5 @@
+// Mantem um fallback local para funcionamento offline.
+// Keeps a local fallback for offline operation.
 (function () {
   'use strict';
   const CONFIG_KEY = 'gerenciaPonto.config';

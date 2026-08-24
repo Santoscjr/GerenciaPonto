@@ -1,0 +1,11 @@
+{
+  "name": "Gerencia Ponto",
+  "short_name": "Ponto",
+  "description": "Controle pessoal de jornada.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0e1c2e",
+  "theme_color": "#0b1f3a",
+  "lang": "pt-BR",
+  "icons": []
+}
