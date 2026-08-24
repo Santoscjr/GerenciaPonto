@@ -1,3 +1,6 @@
+.action-button:active:not(:disabled),.save-button:active,.auth-submit:active,.tour-next:active { transform:scale(.98); }
+.action-button.is-recorded { animation:record-pulse .45s ease; }
+@keyframes record-pulse { 0% { box-shadow:0 0 0 0 rgba(0,102,204,.35); } 100% { box-shadow:0 0 0 12px rgba(0,102,204,0); } }
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 :root { --navy:#0b1f3a; --blue:#0066cc; --purple:#6d3fc0; --green:#16a34a; --amber:#f59e0b; --red:#dc2626; --mist:#f5f7fa; --white:#fff; --ink:#152238; --muted:#718096; --line:#e6ebf2; --shadow:0 14px 35px rgba(11,31,58,.07); }
@@ -116,7 +119,7 @@ body[data-tour-target="clock-in"] .tour-dialog:before { left:-9px; bottom:50%; b
 @keyframes rise-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 .hero-grid,.progress-card,.stats-grid,.content-grid { animation:rise-in .55s ease both; }
 .progress-card { animation-delay:.08s; }.stats-grid { animation-delay:.16s; }.content-grid { animation-delay:.24s; }
-@media (max-width:760px) { .topbar { height:78px; }.topbar-date { margin-left:auto; }.theme-toggle { margin-left:12px; }.hero-grid { padding-top:40px; }.progress-card,.panel { padding:24px 20px; }.stats-grid { gap:10px; } }
+@media (max-width:760px) { .app-shell { padding:0 16px 28px; }.topbar { height:auto; min-height:76px; padding:14px 0; flex-wrap:wrap; gap:10px; }.topbar-date { margin-left:auto; }.theme-toggle { margin-left:2px; }.tour-help { margin-left:0; }.sign-out { margin-left:0; }.hero-grid { grid-template-columns:1fr; gap:20px; padding:36px 0 24px; }.hero-copy h1 { font-size:clamp(30px,9vw,42px); }.hero-description { font-size:13px; }.clock-panel { min-width:0; padding:18px 20px; }.progress-card,.panel { padding:22px 18px; }.stats-grid { gap:10px; }.stat-card { min-height:96px; padding:15px 12px; }.stat-card strong { font-size:17px; }.action-grid { grid-template-columns:1fr; gap:9px; }.action-button { min-height:68px; padding:14px; }.overtime-status { align-items:flex-start; }.progress-footer { align-items:flex-start; } }
 @media (max-width:410px) { .overtime-status { align-items:flex-start; }.overtime-status > strong { margin-left:auto; font-size:11px; text-align:right; } }
 @media (max-width:410px) { .adjust-form { align-items:stretch; flex-direction:column; }.adjust-form button { width:100%; } }
 @media (max-width:410px) { .tour-dialog { bottom:16px; padding:23px 20px 18px; }.tour-dialog h2 { font-size:21px; } }
