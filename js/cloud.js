@@ -9,6 +9,9 @@
   }
   function toIso(timestamp) { return timestamp ? new Date(timestamp).toISOString() : null; }
   function fromIso(value) { return value ? new Date(value).getTime() : null; }
+
+  // A nuvem complementa o fallback local e nao bloqueia o ponto offline.
+  // Cloud sync complements local fallback and never blocks offline clocking.
   async function getUser() {
     if (!client) return null;
     const result = await client.auth.getUser();
@@ -17,6 +20,8 @@
   async function hydrate() {
     const user = await getUser();
     if (!user) return;
+    // Carrega os dados remotos em paralelo para reduzir o tempo de espera.
+    // Loads remote data in parallel to reduce waiting time.
     const [profileResult, settingsResult, workdayResult] = await Promise.all([
       client.from('profiles').select('name').eq('id', user.id).maybeSingle(),
       client.from('work_settings').select('workday_minutes,lunch_minutes,lunch_paid,max_overtime_minutes').eq('user_id', user.id).maybeSingle(),
@@ -36,6 +41,8 @@
   async function syncWorkday(session) {
     const user = await getUser();
     if (!user) return;
+    // Upsert garante uma jornada por usuario e data.
+    // Upsert guarantees one workday per user and date.
     await client.from('workdays').upsert({ user_id: user.id, work_date: session.date, entry_at: toIso(session.entry), lunch_start_at: toIso(session.lunchStart), lunch_end_at: toIso(session.lunchEnd), exit_at: toIso(session.exit), entry_source: 'automatic', updated_at: new Date().toISOString() }, { onConflict: 'user_id,work_date' });
   }
   async function syncSettings(config) {

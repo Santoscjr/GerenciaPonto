@@ -2,6 +2,8 @@
 // Handles login, signup, password recovery, and session sign-out.
 (function () {
   'use strict';
+  // Usa somente a chave publica anon no navegador.
+  // Uses only the public anon key in the browser.
   const config = window.SUPABASE_CONFIG;
   const supabaseClient = window.supabase.createClient(config.url, config.anonKey);
   const authGate = document.getElementById('auth-gate');
@@ -23,6 +25,8 @@
     authMessage.textContent = message;
     authMessage.className = error ? 'auth-message error' : 'auth-message';
   }
+  // Alterna entre login e cadastro sem recarregar a pagina.
+  // Switches between login and signup without reloading the page.
   function setMode(nextMode) {
     mode = nextMode;
     const signup = mode === 'signup';
@@ -36,6 +40,8 @@
     setMessage('');
   }
   function showApp(user) {
+    // Esconde o login antes de exibir o painel autenticado.
+    // Hides login before showing the authenticated dashboard.
     authGate.hidden = true;
     appShell.hidden = false;
     document.body.classList.remove('auth-loading');
