@@ -9,6 +9,8 @@
   }
   function toIso(timestamp) { return timestamp ? new Date(timestamp).toISOString() : null; }
   function fromIso(value) { return value ? new Date(value).getTime() : null; }
+  let currentUserId = null;
+  let realtimeChannel = null;
 
   // A nuvem complementa o fallback local e nao bloqueia o ponto offline.
   // Cloud sync complements local fallback and never blocks offline clocking.
@@ -20,6 +22,8 @@
   async function hydrate() {
     const user = await getUser();
     if (!user) return;
+    currentUserId = user.id;
+    window.PontoStorage?.setUser(user.id);
     // Carrega os dados remotos em paralelo para reduzir o tempo de espera.
     // Loads remote data in parallel to reduce waiting time.
     const [profileResult, settingsResult, workdayResult] = await Promise.all([
@@ -28,15 +32,27 @@
       client.from('workdays').select('entry_at,lunch_start_at,lunch_end_at,exit_at,entry_source').eq('user_id', user.id).eq('work_date', localDateKey(new Date())).maybeSingle()
     ]);
     if (profileResult.data || settingsResult.data) {
-      const current = JSON.parse(localStorage.getItem('gerenciaPonto.config') || '{}');
+      const current = window.PontoStorage.getConfig();
       const remote = settingsResult.data || {};
-      localStorage.setItem('gerenciaPonto.config', JSON.stringify(Object.assign({}, current, profileResult.data?.name ? { name: profileResult.data.name } : {}, remote.workday_minutes ? { workdayMinutes: remote.workday_minutes } : {}, remote.lunch_minutes !== undefined ? { lunchMinutes: remote.lunch_minutes } : {}, remote.lunch_paid !== undefined ? { lunchPaid: remote.lunch_paid } : {})));
+      window.PontoStorage.saveConfig(Object.assign({}, current, profileResult.data?.name ? { name: profileResult.data.name } : {}, remote.workday_minutes ? { workdayMinutes: remote.workday_minutes } : {}, remote.lunch_minutes !== undefined ? { lunchMinutes: remote.lunch_minutes } : {}, remote.lunch_paid !== undefined ? { lunchPaid: remote.lunch_paid } : {}));
     }
     if (workdayResult.data) {
       const day = workdayResult.data;
-      localStorage.setItem('gerenciaPonto.session', JSON.stringify({ date: localDateKey(new Date()), entry: fromIso(day.entry_at), lunchStart: fromIso(day.lunch_start_at), lunchEnd: fromIso(day.lunch_end_at), exit: fromIso(day.exit_at) }));
-    }
+      window.PontoStorage.saveSession({ date: localDateKey(new Date()), entry: fromIso(day.entry_at), lunchStart: fromIso(day.lunch_start_at), lunchEnd: fromIso(day.lunch_end_at), exit: fromIso(day.exit_at) });
+    } else window.PontoStorage.saveSession({ date: localDateKey(new Date()), entry: null, lunchStart: null, lunchEnd: null, exit: null });
+    subscribeToWorkday(user.id);
     document.dispatchEvent(new CustomEvent('ponto:cloud-hydrated'));
+  }
+  function applyRemoteWorkday(payload) {
+    if (payload.user_id !== currentUserId || payload.work_date !== localDateKey(new Date())) return;
+    window.PontoStorage.saveSession({ date: payload.work_date, entry: fromIso(payload.entry_at), lunchStart: fromIso(payload.lunch_start_at), lunchEnd: fromIso(payload.lunch_end_at), exit: fromIso(payload.exit_at) });
+    document.dispatchEvent(new CustomEvent('ponto:cloud-workday-changed'));
+  }
+  function subscribeToWorkday(userId) {
+    realtimeChannel?.unsubscribe();
+    realtimeChannel = client.channel(`workday-${userId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'workdays', filter: `user_id=eq.${userId}` }, event => applyRemoteWorkday(event.new || event.old || {}))
+      .subscribe();
   }
   async function syncWorkday(session) {
     const user = await getUser();

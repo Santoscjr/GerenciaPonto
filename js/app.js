@@ -38,6 +38,17 @@
     return timestamp ? new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
   }
 
+  function greetingForHour(hour) {
+    if (hour < 12) return 'Bom dia';
+    if (hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }
+
+  function updateGreeting() {
+    const prefix = storage.consumeDailyGreeting() ? greetingForHour(new Date().getHours()) : 'Olá';
+    el('greeting').firstChild.textContent = `${prefix}, `;
+  }
+
   function timeInputTimestamp(value) {
     const match = String(value).match(/^(\d{2}):(\d{2})$/);
     if (!match) return null;
@@ -180,6 +191,9 @@
     el('shift-info').textContent = end ? `O fim do seu turno será às ${timeText(end)}, podendo se estender até no máximo às ${timeText(maxExit)}.` : 'Registre sua entrada para ver o fim do turno.';
     if (overtime >= 90 && overtime < MAX_OVERTIME_MINUTES) notifyUser('overtime-warning', 'Hora extra próxima do limite', `Restam ${minutesToText(overtimeRemaining)} até o limite de 2h extras.`);
     if (overtime >= MAX_OVERTIME_MINUTES) notifyUser('overtime-limit', 'Limite de hora extra alcançado', 'O limite de 2 horas extras deste turno foi alcançado.');
+    if (!session.entry && new Date().getHours() >= 9) notifyUser(`missing-entry-${session.date}`, 'Não esqueça de registrar seu ponto', 'Registre sua entrada para começar sua jornada.');
+    if (end && !session.exit && end - now <= 15 * 60000 && end > now) notifyUser('shift-ending', 'Seu turno está terminando', 'Faltam 15 minutos para o fim do seu turno.');
+    if (overtime > 0) notifyUser('overtime-started', 'Hora extra iniciada', 'Você acaba de entrar em hora extra.');
     const records = [
       ['Entrada', session.entry],
       ['Início do almoço', session.lunchStart],
@@ -309,6 +323,7 @@
     if (event.key === 'Escape' && !el('tour-dialog').hidden) closeTour();
   });
   document.addEventListener('ponto:authenticated', function () {
+    updateGreeting();
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   });
   document.addEventListener('ponto:cloud-hydrated', function () {
@@ -317,10 +332,15 @@
     initSettings();
     updateDashboard();
   });
+  document.addEventListener('ponto:cloud-workday-changed', function () {
+    session = storage.getSession();
+    updateDashboard();
+    showToast('Jornada atualizada em outro dispositivo.');
+  });
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   }
-  initSettings(); updateClock(); setInterval(updateClock, 1000);
+  initSettings(); updateGreeting(); updateClock(); setInterval(updateClock, 1000);
   function maybeOpenTour() {
     if (!storage.hasSeenTour()) setTimeout(openTour, 450);
   }

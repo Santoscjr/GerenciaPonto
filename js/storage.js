@@ -9,6 +9,7 @@
   const SESSION_KEY = 'gerenciaPonto.session';
   const THEME_KEY = 'gerenciaPonto.theme';
   const TOUR_KEY = 'gerenciaPonto.tourSeen';
+  let userKey = 'anonymous';
   const defaultConfig = {
     name: '',
     workdayMinutes: 528,
@@ -33,6 +34,10 @@
     }
   }
 
+  function scopedKey(key) {
+    return `${key}.${userKey}`;
+  }
+
   // Usa a data local para evitar troca de jornada na virada UTC.
   // Uses local date to avoid changing workdays at the UTC boundary.
   function localDateKey(date) {
@@ -40,16 +45,20 @@
   }
 
   window.PontoStorage = {
+    setUser: function (userId) {
+      userKey = userId || 'anonymous';
+    },
+
     getConfig: function () {
-      return Object.assign({}, defaultConfig, read(CONFIG_KEY, {}));
+      return Object.assign({}, defaultConfig, read(scopedKey(CONFIG_KEY), {}));
     },
 
     saveConfig: function (config) {
-      write(CONFIG_KEY, config);
+      write(scopedKey(CONFIG_KEY), config);
     },
 
     getSession: function () {
-      const session = read(SESSION_KEY, null);
+      const session = read(scopedKey(SESSION_KEY), null);
       const today = localDateKey(new Date());
       return session && session.date === today
         ? session
@@ -57,7 +66,15 @@
     },
 
     saveSession: function (session) {
-      write(SESSION_KEY, session);
+      write(scopedKey(SESSION_KEY), session);
+    },
+
+    consumeDailyGreeting: function () {
+      const today = localDateKey(new Date());
+      const key = scopedKey('gerenciaPonto.greeting');
+      if (localStorage.getItem(key) === today) return false;
+      try { localStorage.setItem(key, today); } catch (error) { return true; }
+      return true;
     },
 
     getTheme: function () {
@@ -74,12 +91,12 @@
     },
 
     hasSeenTour: function () {
-      return localStorage.getItem(TOUR_KEY) === 'true';
+      return localStorage.getItem(scopedKey(TOUR_KEY)) === 'true';
     },
 
     markTourSeen: function () {
       try {
-        localStorage.setItem(TOUR_KEY, 'true');
+        localStorage.setItem(scopedKey(TOUR_KEY), 'true');
       } catch (error) {
         // O tutorial continua podendo ser exibido novamente.
         // The tutorial can still be displayed again.

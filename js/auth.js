@@ -45,8 +45,9 @@
     authGate.hidden = true;
     appShell.hidden = false;
     document.body.classList.remove('auth-loading');
+    window.PontoStorage?.setUser(user.id);
     const displayName = user.user_metadata?.name;
-    if (displayName && !localStorage.getItem('gerenciaPonto.config')) localStorage.setItem('gerenciaPonto.config', JSON.stringify({ name: displayName, workdayMinutes: 528, lunchMinutes: 60, lunchPaid: false }));
+    if (displayName && !window.PontoStorage.getConfig().name) window.PontoStorage.saveConfig({ name: displayName, workdayMinutes: 528, lunchMinutes: 60, lunchPaid: false });
     if (displayName && document.getElementById('user-name')) document.getElementById('user-name').textContent = displayName;
     document.dispatchEvent(new CustomEvent('ponto:authenticated'));
   }
